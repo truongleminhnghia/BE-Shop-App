@@ -40,9 +40,9 @@ public class SwaggerConfig {
         devServer.setUrl(swaggerDevUrl);
         devServer.description("Server URL in Development Environment");
 
-//        Server proServer = new Server();
-//        proServer.setUrl(swaggerProUrl);
-//        proServer.description("Server URL in Pro Environment");
+        Server proServer = new Server();
+        proServer.setUrl(swaggerProUrl);
+        proServer.description("Server URL in Pro Environment");
 
         Contact contact =new Contact();
         contact.setEmail(email);
@@ -62,7 +62,7 @@ public class SwaggerConfig {
                         .scheme(swaggerScheme).bearerFormat(swaggerFormat));
         return new OpenAPI()
                 .info(info)
-                .servers(List.of(devServer))
+                .servers(List.of(devServer, proServer))
                 .addSecurityItem(securityRequirement)
                 .components(components);
     }
