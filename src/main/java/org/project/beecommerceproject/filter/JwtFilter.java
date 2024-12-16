@@ -38,6 +38,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private String prefix;
 
     private final List<String> REQ_PUBLIC = List.of(
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
             "/public/**",
             "/auth/**"
     );

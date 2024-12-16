@@ -27,6 +27,8 @@ public class WebSecurityConfig {
     private JwtFilter jwtFilter;
 
     private static final String[] REQUEST_PUBLIC = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
             "/public/**",
             "/auth/**"
     };
