@@ -2,7 +2,6 @@ package org.project.beecommerceproject.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import net.minidev.json.annotate.JsonIgnore;
 import org.project.beecommerceproject.enums.EnumRoleName;
 
 import java.util.Set;

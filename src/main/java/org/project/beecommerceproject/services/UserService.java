@@ -1,5 +1,6 @@
 package org.project.beecommerceproject.services;
 
+import org.project.beecommerceproject.dtos.requests.UserRegisterRequest;
 import org.project.beecommerceproject.dtos.requests.UserUpdateRequest;
 import org.project.beecommerceproject.entities.User;
 import org.springframework.security.core.userdetails.UserDetailsService;

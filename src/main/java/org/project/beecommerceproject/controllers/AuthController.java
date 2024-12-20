@@ -1,6 +1,6 @@
 package org.project.beecommerceproject.controllers;
 
-import org.project.beecommerceproject.configs.CustomerDetail;
+import org.project.beecommerceproject.configs.CustomerUserDetail;
 import org.project.beecommerceproject.dtos.requests.LoginRequest;
 import org.project.beecommerceproject.dtos.requests.UserRegisterRequest;
 import org.project.beecommerceproject.dtos.responses.ApiResponse;
@@ -13,9 +13,7 @@ import org.project.beecommerceproject.mappers.UserMapper;
 import org.project.beecommerceproject.repositories.UserRepository;
 import org.project.beecommerceproject.services.JwtService;
 import org.project.beecommerceproject.services.RoleService;
-import org.project.beecommerceproject.services.UserServiceImp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.project.beecommerceproject.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/auths")
 public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -35,7 +33,7 @@ public class AuthController {
     private JwtService jwtService;
 
     @Autowired
-    private UserServiceImp userServiceImp;
+    private UserService userService;
 
     @Autowired
     private UserRepository userRepository;
@@ -50,13 +48,13 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse> login(@RequestBody LoginRequest request, @RequestParam(value = "type_login") String type) {
-        if (type.equals(EnumTypeLogin.TYPE_LOCAL.name())) {
+    public ResponseEntity<ApiResponse> login(@RequestBody LoginRequest request, @RequestParam(value = "type_login", required = false, defaultValue = "TYPE_LOCAL") String type) {
+        if (type.equals(EnumTypeLogin.TYPE_LOCAL.name()) || type.isEmpty()) {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
             if (authentication.isAuthenticated()) {
-                String token = jwtService.generateToken((CustomerDetail) userServiceImp.loadUserByUsername(request.getEmail()));
+                String token = jwtService.generateToken((CustomerUserDetail) userService.loadUserByUsername(request.getEmail()));
                 return ResponseEntity.status(HttpStatus.OK)
                         .body(new ApiResponse(200, true, "Login successfully", token));
             } else {
@@ -71,11 +69,19 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> register(@RequestBody UserRegisterRequest request) {
         User user = userMapper.toUser(request);
-        Role role = roleService.getRoleByName(EnumRoleName.ROLE_USER);
+//        Role role = roleService.getRoleByName(EnumRoleName.ROLE_USER);
+        Role role = new Role();
+        if (request.getRoleName().equals(EnumRoleName.ROLE_ADMIN.name())) {
+            role = roleService.getRoleByName(EnumRoleName.ROLE_ADMIN);
+        } else if (request.getRoleName().equals(EnumRoleName.ROLE_STAFF.name())) {
+            role = roleService.getRoleByName(EnumRoleName.ROLE_STAFF);
+        } else if (request.getRoleName().equals(EnumRoleName.ROLE_USER.name())) {
+            role = roleService.getRoleByName(EnumRoleName.ROLE_USER);
+        }
         user.setRole(role);
         user.setStatus(EnumStatusUser.ACTIVE);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        userServiceImp.save(user);
+        userService.save(user);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponse(200, true, "User registered", userMapper.toUserResponse(user)));
     }

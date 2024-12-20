@@ -3,7 +3,9 @@ package org.project.beecommerceproject.services;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import org.project.beecommerceproject.configs.CustomerDetail;
+import org.project.beecommerceproject.configs.CustomerUserDetail;
+import org.project.beecommerceproject.enums.ErrorCode;
+import org.project.beecommerceproject.exceptions.AppException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,33 +20,22 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-    @Autowired
-    private UserServiceImp userServiceImp;
-    @Autowired
-    private UserService userService;
 
     @Value("${jwt.secret}")
-    private String SERECT_KEY;
-
-    @Value("${jwt.algorithms}")
-    private String alg;
-
+    private String SECRET;
     private static final long VALIDITY = TimeUnit.MINUTES.toMillis(30);
     private static final long LIMIT_REFRESH_TIME = TimeUnit.MINUTES.toMillis(5);
     private static final long TIME_TOKEN_REFESH = TimeUnit.MINUTES.toMillis(10080);
     private static final Date DATE_CREATE_TOKEN = new Date(System.currentTimeMillis());
+    @Autowired
+    private UserService userService;
 
-    private SecretKey generateKey() {
-        byte[] decodeKey = Base64.getDecoder().decode(SERECT_KEY);
-        return new SecretKeySpec(decodeKey, 0, decodeKey.length, alg);
-    }
-
-    public String generateToken(CustomerDetail customerDetail) {
+    public String generateToken(CustomerUserDetail customerDetail) {
         return Jwts.builder()
                 .subject(customerDetail.getUsername())
                 .id(UUID.randomUUID().toString())
-                .claim("iss", "http://localhost:8080/")
-                .claim("userId", customerDetail.getId())
+                .claim("iss", "http://localhost:8080/jwt")
+                .claim("userId", customerDetail.getUserID())
                 .claim("email", customerDetail.getEmail())
                 .claim("role", customerDetail.getAuthorities())
                 .issuedAt(DATE_CREATE_TOKEN)
@@ -53,10 +44,14 @@ public class JwtService {
                 .compact();
     }
 
-    public String extractEmai(String token) {
-        return getClaims(token, Claims::getSubject);
+    private SecretKey generateKey() {
+        byte[] decodeKey = Base64.getDecoder().decode(SECRET);
+        return new SecretKeySpec(decodeKey, "HmacSHA256");
     }
 
+    public String extractEmail(String token) {
+        return getClaims(token, Claims::getSubject);
+    }
     public String extractJwtId(String token) {
         return getClaims(token, Claims::getId);
     }
@@ -65,12 +60,21 @@ public class JwtService {
         return getClaims(token, Claims::getExpiration);
     }
 
+    private <T> T getClaims(String token, Function<Claims, T> claimsTFunction) {
+        return claimsTFunction.apply(
+                Jwts.parser()
+                        .verifyWith(generateKey())
+                        .build()
+                        .parseSignedClaims(token)
+                        .getPayload()
+        );
+    }
+
     public boolean isTokenValid(String token) {
-        if (extractEmai(token) != null && !isTokenExpired(token)) {
+        if (extractEmail(token) != null && !isTokenExpired(token)) {
             return true;
         } else {
-//            throw new AppException(ErrorCode.TOKEN_INVALID);
-            return false;
+            throw new AppException(ErrorCode.TOKEN_INVALID);
         }
     }
 
@@ -83,13 +87,4 @@ public class JwtService {
         }
     }
 
-    private <T> T getClaims(String token, Function<Claims, T> claimsTFunction) {
-        return claimsTFunction.apply(
-                Jwts.parser()
-                        .verifyWith(generateKey())
-                        .build()
-                        .parseSignedClaims(token)
-                        .getPayload()
-        );
-    }
 }
