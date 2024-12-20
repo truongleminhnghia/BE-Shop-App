@@ -1,6 +1,9 @@
 package org.project.beecommerceproject.configs;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.project.beecommerceproject.entities.Role;
 import org.project.beecommerceproject.entities.User;
 import org.springframework.security.core.GrantedAuthority;
@@ -13,36 +16,36 @@ import java.util.List;
 
 @Setter
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @Builder
-public class CustomerDetail implements UserDetails {
 
-    private String id;
-    private String email;
-    private String password;
+public class CustomerUserDetail implements UserDetails {
+
+    private String userID;
     private String firstName;
     private String lastName;
+    private String email;
+    private String password;
     private String phone;
     private String address;
-    private String avater;
+    private String avatar;
     private Collection<? extends GrantedAuthority> authorities;
 
-    public static CustomerDetail mapUserToCustomerDetail(User user) {
+    public static CustomerUserDetail mapUserToUserDetail(User user) {
         Role role = user.getRole();
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role.getRoleName().name());
         List<GrantedAuthority> roles = new ArrayList<>();
         roles.add(authority);
-        return CustomerDetail.builder()
-                .id(user.getId())
-                .email(user.getEmail())
+
+        return CustomerUserDetail.builder()
+                .userID(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-                .phone(user.getPhone())
-                .address(user.getAddress())
+                .email(user.getEmail())
                 .password(user.getPassword())
+                .phone(user.getPhone())
+                .avatar(user.getAvatar())
                 .authorities(roles)
-                .avater(user.getAvatar())
                 .build();
     }
 

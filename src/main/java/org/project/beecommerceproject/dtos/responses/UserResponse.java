@@ -21,6 +21,6 @@ public class UserResponse {
     private String googleAccountId;
     private String facebookAccountId;
     private EnumStatusUser status;
-    private Role role;
+    private RoleResponse role;
 
 }

@@ -1,6 +1,6 @@
 package org.project.beecommerceproject.configs;
 
-import org.project.beecommerceproject.filter.JwtFilter;
+import org.project.beecommerceproject.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,19 +18,28 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
 @Configuration
 @EnableWebSecurity
-public class WebSecurityConfig {
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class SecurityConfig {
 
     @Autowired
-    private JwtFilter jwtFilter;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean(BeanIds.AUTHENTICATION_MANAGER)
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
 
     private static final String[] REQUEST_PUBLIC = {
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/public/**",
-            "/auth/**"
+            "/auths/**"
     };
 
     @Bean
@@ -44,17 +53,7 @@ public class WebSecurityConfig {
                 })
                 .sessionManagement(m -> m.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 //                .oauth2Login(Customizer.withDefaults())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean(BeanIds.AUTHENTICATION_MANAGER)
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
     }
 }

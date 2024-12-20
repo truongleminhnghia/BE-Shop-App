@@ -1,37 +1,40 @@
 package org.project.beecommerceproject.services;
 
-import org.project.beecommerceproject.configs.CustomerDetail;
+import org.project.beecommerceproject.configs.CustomerUserDetail;
+import org.project.beecommerceproject.dtos.requests.UserRegisterRequest;
 import org.project.beecommerceproject.dtos.requests.UserUpdateRequest;
+import org.project.beecommerceproject.entities.Role;
 import org.project.beecommerceproject.entities.User;
+import org.project.beecommerceproject.enums.EnumRoleName;
+import org.project.beecommerceproject.enums.ErrorCode;
+import org.project.beecommerceproject.exceptions.AppException;
+import org.project.beecommerceproject.mappers.UserMapper;
 import org.project.beecommerceproject.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class UserServiceImp implements UserDetailsService, UserService {
+public class UserServiceImp implements UserService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(username);
-        if (user == null) {
-            throw new UsernameNotFoundException(username);
-        } else {
-            return CustomerDetail.mapUserToCustomerDetail(user);
-        }
-    }
-
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private RoleService roleService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public User save(User user) {
-        return null;
+        if (userRepository.existsByEmail(user.getEmail()))
+            throw new AppException(ErrorCode.USER_EXISTED);
+        return userRepository.save(user);
     }
 
     @Override
@@ -59,5 +62,13 @@ public class UserServiceImp implements UserDetailsService, UserService {
         return false;
     }
 
-
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            return CustomerUserDetail.mapUserToUserDetail(user);
+        } else {
+            throw new UsernameNotFoundException(email);
+        }
+    }
 }
