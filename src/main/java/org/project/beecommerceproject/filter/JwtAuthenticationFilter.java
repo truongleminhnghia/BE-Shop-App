@@ -34,8 +34,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final List<String> REQ_PUBLIC = List.of(
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/public/**",
-            "/auths/**"
+            "/public/**"
+//            "/auths/**"
     );
 
     public String getToken(HttpServletRequest request) {

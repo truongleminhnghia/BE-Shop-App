@@ -48,7 +48,7 @@ public class User {
     @Column(name = "status", nullable = false)
     private EnumStatusUser status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 }

@@ -1,5 +1,6 @@
 package org.project.beecommerceproject.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.project.beecommerceproject.enums.EnumRoleName;
@@ -24,6 +25,7 @@ public class Role {
     @Column(name = "role_name")
     private EnumRoleName roleName;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "role")
     private Set<User> user;
 }
