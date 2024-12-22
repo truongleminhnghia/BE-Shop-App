@@ -68,20 +68,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> register(@RequestBody UserRegisterRequest request) {
-        User user = userMapper.toUser(request);
-//        Role role = roleService.getRoleByName(EnumRoleName.ROLE_USER);
-        Role role = new Role();
-        if (request.getRoleName().equals(EnumRoleName.ROLE_ADMIN.name())) {
-            role = roleService.getRoleByName(EnumRoleName.ROLE_ADMIN);
-        } else if (request.getRoleName().equals(EnumRoleName.ROLE_STAFF.name())) {
-            role = roleService.getRoleByName(EnumRoleName.ROLE_STAFF);
-        } else if (request.getRoleName().equals(EnumRoleName.ROLE_USER.name())) {
-            role = roleService.getRoleByName(EnumRoleName.ROLE_USER);
-        }
-        user.setRole(role);
-        user.setStatus(EnumStatusUser.ACTIVE);
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        userService.save(user);
+        User user = userService.save(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponse(200, true, "User registered", userMapper.toUserResponse(user)));
     }
