@@ -11,6 +11,7 @@ import org.project.beecommerceproject.enums.ErrorCode;
 import org.project.beecommerceproject.exceptions.AppException;
 import org.project.beecommerceproject.mappers.UserMapper;
 import org.project.beecommerceproject.repositories.UserRepository;
+import org.project.beecommerceproject.src.AppUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -63,15 +64,24 @@ public class UserServiceImp implements UserService {
 
     @Override
     public User getByEmail(String email) {
-        User user = userRepository.findByEmail(email);
+        String idModified = AppUtils.cutString(email);
+        if (idModified == null) {
+            throw new AppException(ErrorCode.USER_ID_NOT_NULL);
+        }
+        User user = userRepository.findByEmail(idModified);
         if (user == null) {
-            throw new AppException(ErrorCode.USER_DO_NOT_EXIST);
+            throw new AppException(ErrorCode.EMAIL_NOT_NULL);
         }
         return user;
     }
 
     @Override
     public User getById(String id) {
+        boolean isAdmin = AppUtils.checkAdmin();
+        boolean checkUserCurrent = AppUtils.checkUserCurrent(id);
+        if(!isAdmin && !checkUserCurrent) {
+            throw new AppException(ErrorCode.NO_ACCESS);
+        }
         return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_DO_NOT_EXIST));
     }
 
@@ -83,7 +93,30 @@ public class UserServiceImp implements UserService {
 
     @Override
     public User update(String id, UserUpdateRequest request) {
-        return null;
+        boolean checkUserCurrent = AppUtils.checkUserCurrent(id);
+        if (!checkUserCurrent) {
+            throw new AppException(ErrorCode.NO_ACCESS);
+        }
+        User user = getById(id);
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_DO_NOT_EXIST);
+        }
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName());
+        }
+        if (request.getPhoneNUmber() != null) {
+            user.setAddress(request.getAddress());
+        }
+        if (request.getAddress() != null) {
+            user.setAddress(request.getAddress());
+        }
+        if (request.getAddress() != null) {
+            user.setAvatar(request.getAvatar());
+        }
+        return userRepository.save(user);
     }
 
     @Override
