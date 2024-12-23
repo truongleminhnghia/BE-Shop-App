@@ -18,6 +18,10 @@ public enum ErrorCode {
     USERNAME_OR_PASSWORD_INVALID(HttpStatus.UNAUTHORIZED, "Username or password invalid"),
     USER_DO_NOT_EXIST(HttpStatus.NOT_FOUND, "User don't exist"),
     USER_HAS_LOCKED(HttpStatus.CONFLICT, "User has locked"),
+    TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "Token do not found"),
+    EMAIL_NOT_NULL(HttpStatus.BAD_REQUEST, "Email must not be null"),
+    TOKEN_DO_NOT_REFRESH(HttpStatus.OK, "Token do not refresh"),
+
     USER_EXIST(HttpStatus.BAD_REQUEST, "User already exists");
 
     private HttpStatus code;

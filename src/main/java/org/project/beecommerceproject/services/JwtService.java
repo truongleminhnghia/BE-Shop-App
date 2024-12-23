@@ -4,6 +4,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import org.project.beecommerceproject.configs.CustomerUserDetail;
+import org.project.beecommerceproject.dtos.requests.TokenRequest;
+import org.project.beecommerceproject.entities.Token;
+import org.project.beecommerceproject.enums.EnumTokenType;
 import org.project.beecommerceproject.enums.ErrorCode;
 import org.project.beecommerceproject.exceptions.AppException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,8 @@ public class JwtService {
     private static final Date DATE_CREATE_TOKEN = new Date(System.currentTimeMillis());
     @Autowired
     private UserService userService;
+    @Autowired
+    private TokenService tokenService;
 
     public String generateToken(CustomerUserDetail customerDetail) {
         return Jwts.builder()
@@ -42,6 +47,37 @@ public class JwtService {
                 .expiration(new Date(DATE_CREATE_TOKEN.getTime() + VALIDITY))
                 .signWith(generateKey())
                 .compact();
+    }
+
+    public String refreshToken(TokenRequest request) {
+        boolean result = isTokenValid(request.getToken());
+        if (result) {
+            Date exp = getExpiration(request.getToken());
+            String email = extractEmail(request.getToken());
+            if (email != null) {
+                CustomerUserDetail customer = (CustomerUserDetail) userService.loadUserByUsername(email);
+                long remainingTime = exp.getTime() - System.currentTimeMillis();
+                if (remainingTime >= LIMIT_REFRESH_TIME) {
+                    Token token = tokenService.save(request);
+                    if (request.getType().equals(EnumTokenType.ACCESS_TOKEN)) {
+                        return Jwts.builder()
+                                .subject(customer.getUsername())
+                                .id(UUID.randomUUID().toString())
+                                .claim("iss", "http://localhost:8080/jwt")
+                                .claim("userId", customer.getUserID())
+                                .claim("email", customer.getEmail())
+                                .claim("role", customer.getAuthorities())
+                                .issuedAt(DATE_CREATE_TOKEN)
+                                .expiration(new Date(DATE_CREATE_TOKEN.getTime() + TIME_TOKEN_REFESH))
+                                .signWith(generateKey())
+                                .compact();
+                    }
+                }
+            } else {
+                throw new AppException(ErrorCode.EMAIL_NOT_NULL);
+            }
+        }
+        throw new AppException(ErrorCode.TOKEN_DO_NOT_REFRESH);
     }
 
     private SecretKey generateKey() {
@@ -71,7 +107,7 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token) {
-        if (extractEmail(token) != null && !isTokenExpired(token)) {
+        if (extractEmail(token) != null && !isTokenExpired(token) && !tokenService.exitById(extractJwtId(token))) {
             return true;
         } else {
             throw new AppException(ErrorCode.TOKEN_INVALID);
