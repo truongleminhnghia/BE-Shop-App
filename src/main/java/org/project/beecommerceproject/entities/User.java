@@ -48,7 +48,10 @@ public class User {
     @Column(name = "status", nullable = false)
     private EnumStatusUser status;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @Column(name = "lock_user")
+    private boolean lockUser = false;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 }

@@ -1,7 +1,6 @@
 package org.project.beecommerceproject.dtos.responses;
 
 import lombok.*;
-import org.project.beecommerceproject.entities.Role;
 import org.project.beecommerceproject.enums.EnumStatusUser;
 
 @Setter
@@ -20,6 +19,7 @@ public class UserResponse {
     private String avatar;
     private String googleAccountId;
     private String facebookAccountId;
+    private boolean lockUser;
     private EnumStatusUser status;
     private RoleResponse role;
 
