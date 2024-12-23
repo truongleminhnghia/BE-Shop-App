@@ -1,48 +1,52 @@
 package org.project.beecommerceproject.controllers;
 
-import org.project.beecommerceproject.configs.CustomerUserDetail;
 import org.project.beecommerceproject.dtos.requests.LoginRequest;
+import org.project.beecommerceproject.dtos.requests.Oauth2Request;
 import org.project.beecommerceproject.dtos.requests.UserRegisterRequest;
 import org.project.beecommerceproject.dtos.responses.ApiResponse;
 import org.project.beecommerceproject.entities.User;
 import org.project.beecommerceproject.enums.EnumTypeLogin;
 import org.project.beecommerceproject.mappers.UserMapper;
-import org.project.beecommerceproject.services.JwtService;
-import org.project.beecommerceproject.services.UserService;
+import org.project.beecommerceproject.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/auths")
+@CrossOrigin(origins = "*")
 public class AuthController {
     @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private JwtService jwtService;
-    @Autowired
-    private UserService userService;
-    @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse> login(@RequestBody LoginRequest request, @RequestParam(value = "type_login", required = false, defaultValue = "TYPE_LOCAL") String type) {
-        if (type.equals(EnumTypeLogin.TYPE_LOCAL.name()) || type.isEmpty()) {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-            );
-            if (authentication.isAuthenticated()) {
-                String token = jwtService.generateToken((CustomerUserDetail) userService.loadUserByUsername(request.getEmail()));
+    public ResponseEntity<ApiResponse> login(
+            @RequestBody LoginRequest request,
+            @RequestParam("type_login") String type) throws UnsupportedEncodingException {
+        if (type.equals(EnumTypeLogin.TYPE_LOCAL.name())) {
+            String tokenRes = authService.login(request.getEmail(), request.getPassword());
+            if (tokenRes != null) {
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body(new ApiResponse(200, true, "Login successfully", token));
-            } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(new ApiResponse(400, false, "Login failed", null));
+                        .body(new ApiResponse(200, true, "Login successfully", tokenRes));
             }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse(400, false, "Login failed", null));
+        } else if (type.equals(EnumTypeLogin.TYPE_GOOGLE.name())) {
+            String urlRes = authService.generateUrl(type);
+            if (urlRes == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new ApiResponse(400, false, "Generate URL failed", null));
+            }
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ApiResponse(200, true, "Generate URL successfully", urlRes));
         } else {
             return null;
         }
@@ -50,8 +54,36 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> register(@RequestBody UserRegisterRequest request) {
-        User user = userService.save(request);
+        User user = authService.register(request);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ApiResponse(400, true, "Failed", null));
+        }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponse(200, true, "User registered", userMapper.toUserResponse(user)));
+    }
+
+    @GetMapping("/callback")
+    public ResponseEntity<ApiResponse> callBackAuthenticate(
+            @RequestParam("code") String code,
+            @RequestParam("type_login") String type) throws IOException {
+        Map<String, Object> infoUser = authService.authenticateAndFetchProfile(code, type);
+        if (infoUser == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse(400, false, "failed", null));
+        }
+        if (type.equals(EnumTypeLogin.TYPE_GOOGLE.name())) {
+            Oauth2Request oauth2Request = Oauth2Request.builder()
+                    .fullName((String) Objects.requireNonNullElse(infoUser.get("name"), ""))
+                    .googleAccountId((String) Objects.requireNonNullElse(infoUser.get("sub"), ""))
+                    .password("")
+                    .email((String) Objects.requireNonNullElse(infoUser.get("email"), ""))
+                    .avatar((String) Objects.requireNonNullElse(infoUser.get("picture"), ""))
+                    .phoneNumber("")
+                    .facebookAccountId("")
+                    .build();
+            String result = authService.loginOauth2(oauth2Request);
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse(200, true, "success", result));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse(400, false, "failed", null));
     }
 }

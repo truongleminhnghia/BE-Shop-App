@@ -12,11 +12,11 @@ import org.project.beecommerceproject.exceptions.AppException;
 import org.project.beecommerceproject.mappers.UserMapper;
 import org.project.beecommerceproject.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -33,12 +33,11 @@ public class UserServiceImp implements UserService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public User save(UserRegisterRequest request) {
+    public User save(UserRegisterRequest request, boolean isAdmin) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
         User user = userMapper.toUser(request);
-        CustomerUserDetail customerUserDetail = (CustomerUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.out.println("customer login current: " + customerUserDetail.getEmail() + " " + customerUserDetail.getAuthorities());
-        boolean isAdmin = customerUserDetail.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
         Role role = getRole(request, isAdmin);
         user.setRole(role);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -46,17 +45,17 @@ public class UserServiceImp implements UserService {
         return userRepository.save(user);
     }
 
-    private static Role getRole(UserRegisterRequest request, boolean isAdmin) {
-        Role role = new Role();
+    private Role getRole(UserRegisterRequest request, boolean isAdmin) {
+        Role role = null;
         if (!isAdmin) {
-            role.setRoleName(EnumRoleName.ROLE_USER);
+            role = roleService.getRoleByName(EnumRoleName.ROLE_USER);
         } else {
             if (request.getRoleName().equals(EnumRoleName.ROLE_ADMIN.name())) {
-                role.setRoleName(EnumRoleName.ROLE_ADMIN);
+                role = roleService.getRoleByName(EnumRoleName.ROLE_ADMIN);
             } else if (request.getRoleName().equals(EnumRoleName.ROLE_USER.name())) {
-                role.setRoleName(EnumRoleName.ROLE_USER);
+                role = roleService.getRoleByName(EnumRoleName.ROLE_USER);
             } else if (request.getRoleName().equals(EnumRoleName.ROLE_STAFF.name())) {
-                role.setRoleName(EnumRoleName.ROLE_STAFF);
+                role = roleService.getRoleByName(EnumRoleName.ROLE_STAFF);
             }
         }
         return role;
@@ -64,17 +63,22 @@ public class UserServiceImp implements UserService {
 
     @Override
     public User getByEmail(String email) {
-        return null;
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new AppException(ErrorCode.USER_DO_NOT_EXIST);
+        }
+        return user;
     }
 
     @Override
     public User getById(String id) {
-        return null;
+        return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_DO_NOT_EXIST));
     }
 
     @Override
     public List<User> getAll() {
-        return List.of();
+        List<User> users = userRepository.findAll();
+        return users;
     }
 
     @Override
@@ -85,6 +89,12 @@ public class UserServiceImp implements UserService {
     @Override
     public boolean delete(String id) {
         return false;
+    }
+
+    @Override
+    @Transactional
+    public boolean lockUser(String id) {
+        return userRepository.lockUser(id) > 0;
     }
 
     @Override

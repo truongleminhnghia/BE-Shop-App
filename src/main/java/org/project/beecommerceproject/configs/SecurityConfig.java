@@ -1,5 +1,6 @@
 package org.project.beecommerceproject.configs;
 
+import org.project.beecommerceproject.exceptions.GlobalExceptionHandler;
 import org.project.beecommerceproject.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,7 @@ public class SecurityConfig {
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @Autowired private GlobalExceptionHandler globalExceptionHandler;
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -39,7 +41,7 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/public/**",
-//            "/auths/**"
+            "/auths/**"
     };
 
     @Bean
@@ -52,7 +54,7 @@ public class SecurityConfig {
                     res.anyRequest().authenticated();
                 })
                 .sessionManagement(m -> m.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .oauth2Login(Customizer.withDefaults())
+                .oauth2Login(Customizer.withDefaults())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

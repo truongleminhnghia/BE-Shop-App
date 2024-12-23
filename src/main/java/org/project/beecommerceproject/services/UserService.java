@@ -9,10 +9,11 @@ import java.util.List;
 
 public interface UserService extends UserDetailsService {
 
-    User save(UserRegisterRequest request);
+    User save(UserRegisterRequest request, boolean isAdmin);
     User getByEmail(String email);
     User getById(String id);
     List<User> getAll();
     User update(String id, UserUpdateRequest request);
     boolean delete(String id);
+    boolean lockUser(String id);
 }
