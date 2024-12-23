@@ -41,8 +41,6 @@ public class AuthServiceImp implements AuthService {
     private UserService userService;
     @Autowired
     private RoleService roleService;
-    @Autowired
-    private UserMapper userMapper;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientIdGoogle;
