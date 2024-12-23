@@ -5,8 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class AppUtils {
     public static CustomerUserDetail getCustomerUserDetail() {
-        CustomerUserDetail customerUserDetail = (CustomerUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return customerUserDetail;
+        return (CustomerUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
     public static boolean checkAdmin() {
@@ -18,5 +17,32 @@ public class AppUtils {
             isAdmin = true;
         }
         return isAdmin;
+    }
+
+    public static String getUserIdCurrentUser() {
+        String userIdCurrent = null;
+        CustomerUserDetail customerUserDetail = getCustomerUserDetail();
+        if (customerUserDetail != null) {
+            userIdCurrent = customerUserDetail.getUserID();
+        }
+        return userIdCurrent;
+    }
+
+    public static String cutString(String str) {
+        String modifiedString = str.trim();
+        if(modifiedString.isEmpty() || modifiedString == null) {
+            return null;
+        }
+        return modifiedString;
+    }
+
+    public static boolean checkUserCurrent(String id) {
+        boolean result;
+        String userId = cutString(id);
+        String userIdCurrent = getUserIdCurrentUser();
+        if (userIdCurrent == null || userId == null) {
+            result = false;
+        } else result = userId.equals(userIdCurrent);
+        return result;
     }
 }

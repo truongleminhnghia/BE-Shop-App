@@ -1,5 +1,13 @@
 package org.project.beecommerceproject.dtos.requests;
 
+import lombok.*;
+
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Data
 public class UserUpdateRequest {
 
     private String firstName;
