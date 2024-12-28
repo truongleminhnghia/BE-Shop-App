@@ -6,6 +6,7 @@ import org.project.beecommerceproject.entities.User;
 import org.project.beecommerceproject.mappers.UserMapper;
 import org.project.beecommerceproject.services.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +20,7 @@ import java.util.List;
 public class AdminController {
 
     @Autowired
+    @Qualifier("adminServiceImp")
     private AdminService adminService;
     @Autowired
     private UserMapper userMapper;

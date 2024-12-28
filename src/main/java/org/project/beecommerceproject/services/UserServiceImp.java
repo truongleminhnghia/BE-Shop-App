@@ -39,7 +39,12 @@ public class UserServiceImp implements UserService {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
         User user = userMapper.toUser(request);
-        Role role = getRole(request, isAdmin);
+        Role role = null;
+        if (isAdmin) {
+            role = getRole(request, isAdmin);
+        } else {
+            role = roleService.getRoleByName(EnumRoleName.ROLE_USER);
+        }
         user.setRole(role);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setStatus(EnumStatusUser.ACTIVE);
