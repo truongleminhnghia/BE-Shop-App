@@ -20,7 +20,6 @@ import java.util.List;
 public class AdminController {
 
     @Autowired
-    @Qualifier("adminServiceImp")
     private AdminService adminService;
     @Autowired
     private UserMapper userMapper;

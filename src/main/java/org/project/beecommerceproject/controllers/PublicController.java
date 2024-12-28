@@ -24,10 +24,8 @@ import java.util.List;
 public class PublicController {
 
     @Autowired
-    @Qualifier("roleServiceImp")
     private RoleService roleService;
     @Autowired
-    @Qualifier("categoryServiceImp")
     private CategoryService categoryService;
     @Autowired private CategoryMapper categoryMapper;
 

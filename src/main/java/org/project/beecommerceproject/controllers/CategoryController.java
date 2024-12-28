@@ -21,7 +21,6 @@ import java.util.List;
 @RequestMapping("${domain.apiUrl}/categories")
 public class CategoryController {
     @Autowired
-    @Qualifier("categoryServiceImp")
     private CategoryService categoryService;
     @Autowired
     private CategoryMapper categoryMapper;
