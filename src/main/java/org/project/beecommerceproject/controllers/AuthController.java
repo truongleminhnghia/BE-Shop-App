@@ -30,10 +30,8 @@ public class AuthController {
     @Autowired
     private UserMapper userMapper;
     @Autowired
-    @Qualifier("authServiceImp")
     private AuthService authService;
     @Autowired
-    @Qualifier("tokenServiceImp")
     private TokenService tokenService;
     @Autowired
     private JwtService jwtService;
