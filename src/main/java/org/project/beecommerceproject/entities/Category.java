@@ -17,12 +17,12 @@ public class Category extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(name = "category_name", columnDefinition = "NVARCHAR(300)", nullable = true)
+    @Column(name = "category_name", columnDefinition = "NVARCHAR(300)", nullable = false)
     private String categoryName;
 
     @Column(name = "description", columnDefinition = "NVARCHAR(300)")
     private String description;
 
-    @Column(name = "status", nullable = true)
+    @Column(name = "status", nullable = false)
     private boolean status = true;
 }

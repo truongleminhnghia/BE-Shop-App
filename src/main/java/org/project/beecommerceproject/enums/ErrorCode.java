@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 @NoArgsConstructor
 public enum ErrorCode {
     ROLE_MUST_BE_ENUM(HttpStatus.BAD_REQUEST, "Role must be enum"),
+    LIST_IS_EMPTY(HttpStatus.BAD_REQUEST, "List is empty"),
     USER_EXISTED(HttpStatus.BAD_REQUEST, "User existed"),
     ROLE_NOT_NULL(HttpStatus.BAD_REQUEST, "role name not null"),
     TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "Token invalid"),
@@ -23,6 +24,11 @@ public enum ErrorCode {
     TOKEN_DO_NOT_REFRESH(HttpStatus.OK, "Token do not refresh"),
     USER_ID_NOT_NULL(HttpStatus.BAD_REQUEST, "UserId must not be null"),
     USER_UPDATE_FAILED(HttpStatus.BAD_REQUEST, "User update failed"),
+    CATEGORY_EXISTS(HttpStatus.BAD_REQUEST, "Category already exists"),
+    ID_IS_NOT_NULL(HttpStatus.BAD_REQUEST, "ID is not null"),
+    NO_CURRENT_USER(HttpStatus.BAD_REQUEST, "User must be login"),
+    CATEGORY_NAME_NOT_NULL(HttpStatus.BAD_REQUEST, "Category name not null"),
+    CATEGORY_DO_NOT_EXIST(HttpStatus.NOT_FOUND, "Category do not exist"),
     USER_EXIST(HttpStatus.BAD_REQUEST, "User already exists");
 
     private HttpStatus code;

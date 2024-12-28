@@ -1,36 +1,34 @@
 package org.project.beecommerceproject.src;
 
 import org.project.beecommerceproject.configs.CustomerUserDetail;
+import org.project.beecommerceproject.enums.ErrorCode;
+import org.project.beecommerceproject.exceptions.AppException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class AppUtils {
     public static CustomerUserDetail getCustomerUserDetail() {
-        return (CustomerUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        CustomerUserDetail customerUserDetail = (CustomerUserDetail) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (customerUserDetail == null) {
+            throw new AppException(ErrorCode.NO_CURRENT_USER);
+        }
+        return customerUserDetail;
     }
 
     public static boolean checkAdmin() {
         CustomerUserDetail customerUserDetail = getCustomerUserDetail();
-        boolean isAdmin = true;
-        if (customerUserDetail == null) {
-            isAdmin = false;
-        } else if (customerUserDetail.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
-            isAdmin = true;
-        }
-        return isAdmin;
+        return customerUserDetail.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
     }
 
     public static String getUserIdCurrentUser() {
         String userIdCurrent = null;
         CustomerUserDetail customerUserDetail = getCustomerUserDetail();
-        if (customerUserDetail != null) {
-            userIdCurrent = customerUserDetail.getUserID();
-        }
+        userIdCurrent = customerUserDetail.getUserID();
         return userIdCurrent;
     }
 
     public static String cutString(String str) {
         String modifiedString = str.trim();
-        if(modifiedString.isEmpty() || modifiedString == null) {
+        if (modifiedString.isEmpty()) {
             return null;
         }
         return modifiedString;

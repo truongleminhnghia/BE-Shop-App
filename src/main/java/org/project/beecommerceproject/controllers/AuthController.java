@@ -13,6 +13,7 @@ import org.project.beecommerceproject.services.AuthService;
 import org.project.beecommerceproject.services.JwtService;
 import org.project.beecommerceproject.services.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,8 +30,10 @@ public class AuthController {
     @Autowired
     private UserMapper userMapper;
     @Autowired
+    @Qualifier("authServiceImp")
     private AuthService authService;
     @Autowired
+    @Qualifier("tokenServiceImp")
     private TokenService tokenService;
     @Autowired
     private JwtService jwtService;
