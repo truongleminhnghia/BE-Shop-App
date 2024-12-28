@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin")
 @CrossOrigin(origins = "*")
@@ -39,4 +41,6 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ApiResponse(400, false, "Lock Account Failed", null));
     }
+
+
 }

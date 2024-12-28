@@ -79,7 +79,7 @@ public class UserServiceImp implements UserService {
     public User getById(String id) {
         boolean isAdmin = AppUtils.checkAdmin();
         boolean checkUserCurrent = AppUtils.checkUserCurrent(id);
-        if(!isAdmin && !checkUserCurrent) {
+        if (!isAdmin && !checkUserCurrent) {
             throw new AppException(ErrorCode.NO_ACCESS);
         }
         return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_DO_NOT_EXIST));
@@ -121,7 +121,16 @@ public class UserServiceImp implements UserService {
 
     @Override
     public boolean delete(String id) {
-        return false;
+        boolean result;
+        User user = getById(id);
+        if (user == null) {
+            result = false;
+        } else {
+            user.setStatus(EnumStatusUser.INACTIVE);
+            userRepository.save(user);
+            result = true;
+        }
+        return result;
     }
 
     @Override

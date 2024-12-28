@@ -9,6 +9,8 @@ import org.project.beecommerceproject.src.AppUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class AdminServiceImp implements AdminService {
 
@@ -40,5 +42,10 @@ public class AdminServiceImp implements AdminService {
             isLocked = true;
         }
         return isLocked;
+    }
+
+    @Override
+    public List<User> getAll() {
+        return userService.getAll();
     }
 }
