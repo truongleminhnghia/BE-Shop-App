@@ -22,6 +22,7 @@ public enum ErrorCode {
     EMAIL_NOT_NULL(HttpStatus.BAD_REQUEST, "Email must not be null"),
     TOKEN_DO_NOT_REFRESH(HttpStatus.OK, "Token do not refresh"),
     USER_ID_NOT_NULL(HttpStatus.BAD_REQUEST, "UserId must not be null"),
+    USER_UPDATE_FAILED(HttpStatus.BAD_REQUEST, "User update failed"),
     USER_EXIST(HttpStatus.BAD_REQUEST, "User already exists");
 
     private HttpStatus code;
