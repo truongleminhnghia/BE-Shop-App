@@ -29,6 +29,9 @@ public enum ErrorCode {
     NO_CURRENT_USER(HttpStatus.BAD_REQUEST, "User must be login"),
     CATEGORY_NAME_NOT_NULL(HttpStatus.BAD_REQUEST, "Category name not null"),
     CATEGORY_DO_NOT_EXIST(HttpStatus.NOT_FOUND, "Category do not exist"),
+    PRODUCT_EXISTING(HttpStatus.BAD_REQUEST, "Product already exists"),
+    BRAND_EXISTING(HttpStatus.BAD_REQUEST, "Brand already exists"),
+    BRAND_DO_NOT_EXIST(HttpStatus.NOT_FOUND, "Brand don't exist"),
     USER_EXIST(HttpStatus.BAD_REQUEST, "User already exists");
 
     private HttpStatus code;

@@ -12,7 +12,6 @@ import org.project.beecommerceproject.entities.Role;
 import org.project.beecommerceproject.entities.User;
 import org.project.beecommerceproject.enums.EnumRoleName;
 import org.project.beecommerceproject.enums.EnumTypeLogin;
-import org.project.beecommerceproject.mappers.UserMapper;
 import org.project.beecommerceproject.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +19,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
